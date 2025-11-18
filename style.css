@@ -1,0 +1,99 @@
+.inter-semibold {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}
+body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  margin-block: 10px;
+}
+.buttons-grid {
+  max-width: 500px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 5px;
+}
+.btn-equals {
+  grid-column: 4/5;
+  grid-row: 4/7;
+}
+.btn-number[data-number="0"] {
+  grid-column: 2/3;
+  grid-row: 5/7;
+}
+.display-wrapper {
+  max-width: 500px;
+  min-height: 100px;
+  display: grid;
+}
+.calculator-container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  max-width: 500px;
+}
+.display-wrapper {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.display {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 48px;
+  text-align: right;
+  width: 100%;
+}
+.btn {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  color: #f7fcffdb;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-operator {
+  background: rgba(0, 255, 136, 0.2);
+  border-color: rgba(0, 255, 136, 0.3);
+}
+
+.btn-equals {
+  background: rgba(0, 255, 136, 0.207);
+  border-color: rgba(0, 255, 136, 0.282);
+}
+
+.btn-action {
+  background: rgba(122, 7, 145, 0.2);
+  border-color: rgba(78, 4, 46, 0.181);
+}
