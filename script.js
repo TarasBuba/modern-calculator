@@ -13,6 +13,11 @@ let brecketLeft = document.querySelector('#brecketLeft')
 let brecketRight = document.querySelector('#brecketRight')
 const displayWithBreckets = '';
 
+//for all buttons
+const allBtns = document.querySelectorAll('.buttons-grid button')
+console.log(allBtns);
+
+
 
 let currValue = '';
 let prevValue = '';
