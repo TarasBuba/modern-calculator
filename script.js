@@ -1,33 +1,82 @@
-const numberBtn = document.querySelectorAll('.btn-number');
-const operatorBtn = document.querySelectorAll('.btn-operator');
-const actionBtn = document.querySelectorAll('.btn-action')
-const acBtn = document.querySelector('#ac')
-const delBtn = document.querySelector('#del')
-const equalBtn = document.querySelector('.btn-equals');
-const specialBtn = document.querySelectorAll('.btn-special')
-const display = document.getElementById('display');
-const persentBtn = document.querySelector('#persent')
-const point = document.querySelector('#point')
-const chahgeThemeBtn = document.querySelector('#change')
 
-
+// в загальному було створено 4 ф-ції для обрахунку(чекає рядок, для дужок окремо, для пріорітета символів та основна,яка передає значення в залежності чи є рядку Дужка чи не має), ШІ підсказв, що через парсер - це більш професійний підхід, от я і спробував.
 
 let displayString = ''
-let brecketLeft = document.querySelector('#brecketLeft')
-let brecketRight = document.querySelector('#brecketRight')
-const displayWithBreckets = '';
-
-//for all buttons
-let currOperator = '';
-let currValue = '';
-let prevValue = '';
-
-let brecketLeftBtn;
-let brecketRightBtn;
-let counterBreckets = 0;
 let result;
 const allBtns = document.querySelectorAll('.buttons-grid button')
 
+let redFlag = false;
+
+allBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        if (e.target.classList.contains('btn-equals')) {
+            let result = mainChekingString(display.value.replaceAll('×', '*'));
+            // в коді нижче через реплейс міняю всі * на х, для відображення на екрані, але коли передаю у ф-цію, міняю назад, найкраще, що зміг придумати)
+            display.value = result;
+            displayString = String(result);
+            redFlag = true;
+        }
+
+
+        if (e.target.classList.contains('btn-number') || e.target.classList.contains('btn-operator') || e.target.classList.contains('btn-special')){
+            if (redFlag === true && e.target.classList.contains('btn-number') ) {
+                displayString = '';
+                displayString = e.target.dataset.symbols;
+                display.value = displayString.replaceAll('*', '×') ;
+                redFlag = false;
+                return;
+            } else if(redFlag === true && e.target.classList.contains('btn-operator') ){
+
+                displayString = display.value + e.target.dataset.symbols
+                display.value = displayString.replaceAll('*', '×') 
+                redFlag = false
+                return;
+
+            } else if(redFlag === false){
+                
+                displayString += e.target.dataset.symbols
+                display.value = displayString.replaceAll('*', '×') ;
+            }
+            
+            
+        } else if(e.target.classList.contains('btn-action') ){
+            if (e.target.id === 'ac') {
+                display.value = '0'
+                displayString = '';
+                redFlag = false;
+            } 
+            else if(e.target.id === 'del'){
+                // console.log(e.target);
+                
+                display.value = display.value.slice(0, -1)
+                displayString = displayString.slice(0, -1)
+                if (display.value === '') {
+                    display.value = '0'
+                    displayString = ''
+                }
+                redFlag = false;
+                return;
+            }
+        }
+
+       
+    })
+})
+
+
+function mainChekingString(anyString) {
+    if (!anyString.includes('(')) {
+        let finalResult = priorityOfSymbols(anyString)
+        return finalResult;
+    }
+    else if(anyString.includes('(')){
+        let indexOPENBrechet = anyString.indexOf('(');
+        let tempObj = mathInsideBreckets(anyString, indexOPENBrechet);
+        let newStr = anyString.slice(0, indexOPENBrechet)+tempObj.insideBrecketsResult + anyString.slice(tempObj.indexOfCLOSEBreckets+1)
+        let finalResult = mainChekingString(newStr)
+        return finalResult;
+    }
+}
 
 function checkingString(str) {
     let staticArrOfSymbols = ['-', '+', '*', '/'];
@@ -55,22 +104,15 @@ function checkingString(str) {
             arrOfNumbers.push(numWithPoint);
             numWithPoint = '';
         }
-        // if (str[i] === '(') {
-        //   let newStr = mathInsideBreckets(str, i)
-        //   str = str.slice(i, newStr.indexOfCLOSEBreckets)
-        //   str[indexOfCLOSEBreckets] = newStr[str]
-
-
-
-        //     }
+   
     }
 
+    if (numWithPoint !== '') {
+        arrOfNumbers.push(numWithPoint)
+    }
+    let objOfElements = { arrOfNumbers, arrOfSymbols }
+    return objOfElements
 }
-if (numWithPoint !== '') {
-    arrOfNumbers.push(numWithPoint)
-}
-let objOfElements = { arrOfNumbers, arrOfSymbols }
-return objOfElements
 
 // console.log(checkingString(display.value));
 function mathInsideBreckets(insideBreckets, indexOfPositionBrecket) {
@@ -78,13 +120,13 @@ function mathInsideBreckets(insideBreckets, indexOfPositionBrecket) {
 
     let insideBrecketsStr = '';
     let insideBrecketsResult;
-    let objOfinsideBreckets = {}
-    let indexOfCLOSEBreckets
-    let indexOfOPENBreckets
-    let insideObj = {}
+    let objOfinsideBreckets = {};
+    let indexOfCLOSEBreckets;
+    let insideObj = {};
+
     for (let i = indexOfPositionBrecket; i < insideBreckets.length; i++) {
         if (insideBreckets[i] === '(') {
-            //  indexOfOPENBreckets = i;
+            
             insideObj = mathInsideBreckets(insideBreckets, i + 1);
             insideBrecketsStr += insideObj.insideBrecketsResult;
             i = insideObj.indexOfCLOSEBreckets;
@@ -92,11 +134,12 @@ function mathInsideBreckets(insideBreckets, indexOfPositionBrecket) {
         }
 
 
-        if (insideBreckets[i] === ')' && i !==insideObj.indexOfCLOSEBreckets) {
+        if (insideBreckets[i] === ')') {
+
             indexOfCLOSEBreckets = Number(i)
-            // insideBrecketsStr.push(insideObj.insideBreckets);
-            let numsAndSyms = checkingString(insideBrecketsStr)
-            insideBrecketsResult = priorityOfSymbols(numsAndSyms);
+            
+            // let numsAndSyms = checkingString(insideBrecketsStr);
+            insideBrecketsResult = priorityOfSymbols(insideBrecketsStr);
 
             objOfinsideBreckets = { insideBrecketsResult, indexOfCLOSEBreckets }
             return objOfinsideBreckets;
@@ -107,14 +150,15 @@ function mathInsideBreckets(insideBreckets, indexOfPositionBrecket) {
 
         }
     }
+    
 
 }
 
 
 
-function priorityOfSymbols() {
+function priorityOfSymbols(anyStr) {
 
-    let objDisplay = checkingString(display.value)
+    let objDisplay = checkingString(anyStr)
     // console.log(obj);
     let temporaryResSYM = objDisplay.arrOfSymbols
     let temporaryResNUM = objDisplay.arrOfNumbers
@@ -123,10 +167,8 @@ function priorityOfSymbols() {
         return temporaryResNUM[0]
     }
     if (temporaryResSYM.length > temporaryResNUM.length || temporaryResSYM.length === 0 && temporaryResNUM.length === 0 || temporaryResSYM.length === temporaryResNUM.length) {
-        return (display.value = 'Error 666')
+        return (anyStr = 'Error 666')
     }
-
-
 
     for (let i = 0; i < temporaryResSYM.length; i++) {
         if (temporaryResSYM[i] === '*') {
@@ -140,7 +182,7 @@ function priorityOfSymbols() {
 
         } else if (temporaryResSYM[i] === '/') {
             if (temporaryResNUM[i + 1] === '0') {
-                return (display.value = 'Error 666')
+                return (anyStr = 'Error 666')
             }
             let innerResult = Number(temporaryResNUM[i]) / Number(temporaryResNUM[i + 1])
 
@@ -178,164 +220,3 @@ function priorityOfSymbols() {
 
 
 }
-
-
-// console.log(allBtns);
-allBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        if (e.target.classList.contains('btn-number')) {
-            // currValue += e.target.dataset.number
-            // display.value = currValue;
-            displayString += e.target.dataset.number
-            display.value = displayString;
-        }
-        if (e.target.classList.contains('btn-operator')) {
-
-            if (currValue.includes('(')) {
-                displayString += e.target.dataset.operator;
-                display.value = displayString.replace('x', '*');
-                return
-            }
-
-            if (prevValue !== '' && currValue !== '' && currOperator !== '') {
-                if (currOperator === '+') {
-                    result = add(prevValue, currValue)
-                } else if (currOperator === '-') {
-                    result = sub(prevValue, currValue)
-                } else if (currOperator === '*') {
-                    result = multi(prevValue, currValue)
-                } else if (currOperator === '/') {
-                    result = div(prevValue, currValue)
-                }
-                display.value = result.replace('x', '*')
-                prevValue = String(result);
-                currValue = ''
-                currOperator = e.target.dataset.operator;
-                return
-            }
-
-            prevValue = currValue
-            currValue = ''
-            currOperator = e.target.dataset.operator
-            display.value = `${prevValue}${currOperator.replace('*', 'x')}`
-        }
-
-
-        if (e.target.classList.contains('btn-action')) {
-            if (e.target.id === 'ac') {
-                currValue = '';
-                prevValue = '';
-
-                display.value = '0'
-                counterBreckets = 0
-            } else {
-                currValue = currValue.slice(0, -1);
-                if (currValue === '') {
-                    display.value = '0'
-                } else {
-
-                    display.value = currValue
-                }
-            }
-        }
-        if (e.target.classList.contains('btn-special')) {
-            if (e.target.id === 'brecketLeft') {
-                brecketLeftBtn = e.target.dataset.number;
-                currValue += brecketLeftBtn;
-                display.value = prevValue + currOperator + currValue;
-                counterBreckets++
-            } else if (e.target.id === 'brecketRight') {
-                if (counterBreckets > 0) {
-                    brecketRightBtn = e.target.dataset.number;
-                    currValue += brecketRightBtn;
-                    display.value = prevValue + currOperator + currValue;
-                    counterBreckets--
-                }
-            }
-            else if (e.target.id === 'persent') {
-                let result = persent(currValue);
-                display.value = result
-                currValue = String(result)
-            } else if (e.target.id === 'point') {
-                if (!currValue.includes('.')) {
-                    currValue = `${currValue}.`;
-                    display.value = currValue;
-                }
-            }
-        }
-        if (e.target.classList.contains('btn-equals')) {
-
-            if (currValue.includes('(') && currValue.includes(')')) {
-
-                // currValue = currValue.replaceAll('x', '*')
-                result = eval(currValue)
-                display.value = result;
-                currValue = String(result);
-                prevValue = ''
-                currOperator = ''
-                return
-            }
-
-            if (currOperator === '') {
-                display.value = currValue
-                return
-            }
-
-
-            if (currOperator === '+') {
-                result = add(prevValue, currValue)
-            } else if (currOperator === '-') {
-                result = sub(prevValue, currValue)
-            } else if (currOperator === '*') {
-                result = multi(prevValue, currValue)
-            } else if (currOperator === '/') {
-                result = div(prevValue, currValue)
-            }
-            display.value = result
-            prevValue = String(result);
-            currValue = '';
-            currOperator = '';
-
-            // return result;
-        }
-    })
-})
-
-
-
-
-
-
-function add(num1, num2) {
-    let res = Number(num1) + Number(num2)
-    return res
-}
-function sub(num1, num2) {
-    let res = Number(num1) - Number(num2)
-    return res
-}
-function multi(num1, num2) {
-    let res = Number(num1) * Number(num2)
-    return res
-}
-function div(num1, num2) {
-    if (Number(num2) === 0) {
-        return 'Error';
-    }
-    let res = Number(num1) / Number(num2)
-    return res;
-}
-function persent(num1) {
-    let persent = num1 / 100;
-    return persent
-}
-
-
-
-
-
-
-
-
-
-
